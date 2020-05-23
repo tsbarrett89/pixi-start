@@ -2,6 +2,8 @@ const Application = PIXI.Application;
 const loader = PIXI.Loader.shared;
 const resources = PIXI.Loader.shared.resources;
 const Sprite = PIXI.Sprite;
+const Container = PIXI.Container;
+const Text = PIXI.Text;
 
 let app = new Application({
     width: window.innerWidth,
@@ -19,13 +21,18 @@ app.renderer.resize(window.innerWidth, window.innerHeight);
 loader
     .add([
         "images/dragonRed.png",
-        "images/warrior.png"
+        "images/warrior.png",
+        "images/wood.png"
     ])
     .load(setup);
 
 let redDragon;
 let warrior;
+let board;
 let state;
+
+let messageBoard = new Container()
+let message = new Text("Practice Game")
 
 function setup() {
     redDragon = new Sprite(
@@ -45,6 +52,20 @@ function setup() {
     warrior.scale.set(0.3);
     warrior.anchor.set(0.5)
     app.stage.addChild(warrior)
+
+    board = new Sprite(
+        resources["images/wood.png"].texture
+    )
+    board.width = app.renderer.width;
+    board.height = 150;
+    board.position.y = app.renderer.height - 150;
+    messageBoard.addChild(board)
+
+    message.position.y = app.renderer.height - 120;
+    message.position.x = 50;
+    messageBoard.addChild(message)
+
+    app.stage.addChild(messageBoard)
 
     let left = keyboard("ArrowLeft")
     let up = keyboard("ArrowUp")
