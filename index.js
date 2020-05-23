@@ -1,21 +1,170 @@
-const canvas = document.getElementById('mycanvas');
+const Application = PIXI.Application;
+const loader = PIXI.Loader.shared;
+const resources = PIXI.Loader.shared.resources;
+const Sprite = PIXI.Sprite;
 
-const app = new PIXI.Application({
-    view: canvas,
+let app = new Application({
     width: window.innerWidth,
     height: window.innerHeight
-});
+})
 
-const texture = PIXI.Texture.from('images/dragonRed.png');
-const img = new PIXI.Sprite(texture);
-img.x = app.renderer.width / 2;
-img.y = app.renderer.height /2;
-img.anchor.x = 0.5;
-img.anchor.y = 0.5;
-app.stage.addChild(img);
+document.body.appendChild(app.view)
 
-app.ticker.add(animate);
+app.renderer.backgroundColor = 0x333;
+app.renderer.view.style.position = "absolute";
+app.renderer.view.style.display = "block";
+app.renderer.autoDensity = true;
+app.renderer.resize(window.innerWidth, window.innerHeight);
 
-function animate(){
-    img.scale.x = -1
+loader
+    .add([
+        "images/dragonRed.png",
+        "images/warrior.png"
+    ])
+    .load(setup);
+
+let redDragon;
+let warrior;
+let state;
+
+function setup() {
+    redDragon = new Sprite(
+        resources["images/dragonRed.png"].texture
+    );
+    redDragon.position.set(200, 200);
+    redDragon.scale.set(0.3);
+    redDragon.anchor.set(0.5);
+    redDragon.vx = 0;
+    redDragon.vy = 0;
+    app.stage.addChild(redDragon);
+
+    warrior = new Sprite(
+        resources["images/warrior.png"].texture
+    );
+    warrior.position.set(400, 400);
+    warrior.scale.set(0.3);
+    warrior.anchor.set(0.5)
+    app.stage.addChild(warrior)
+
+    let left = keyboard("ArrowLeft")
+    let up = keyboard("ArrowUp")
+    let right = keyboard("ArrowRight")
+    let down = keyboard("ArrowDown")
+
+    // left
+    left.press = () => {
+        redDragon.vx = -5;
+        redDragon.vy = 0;
+    };
+    left.release = () => {
+        if(!right.isDown && redDragon.vy === 0){
+            redDragon.vx = 0;
+        }
+    };
+
+    //up
+    up.press = () => {
+        redDragon.vy = -5;
+        redDragon.vx = 0;
+    };
+    up.release = () => {
+        if(!down.isDown && redDragon.vx === 0){
+            redDragon.vy = 0
+        }
+    }
+
+    //right
+    right.press = () => {
+        redDragon.vx = 5;
+        redDragon.vy = 0;
+    }
+    right.release = () => {
+        if(!left.isDown && redDragon.vy === 0){
+            redDragon.vx = 0
+        }
+    }
+
+    //down
+    down.press = () => {
+        redDragon.vy = 5;
+        redDragon.vx = 0;
+    }
+    down.release = () => {
+        if(!up.isDown && redDragon.vx === 0){
+            redDragon.vy = 0
+        }
+    }
+
+
+    state = play;
+
+    app.ticker.add(delta => gameLoop(delta))
 }
+
+function gameLoop(delta){
+    state(delta)
+}
+
+function play(delta){
+    redDragon.x += redDragon.vx;
+    redDragon.y += redDragon.vy;
+}
+
+function keyboard(value) {
+    let key = {};
+    key.value = value;
+    key.isDown = false;
+    key.isUp = true;
+    key.press = undefined;
+    key.release = undefined;
+    //The `downHandler`
+    key.downHandler = event => {
+      if (event.key === key.value) {
+        if (key.isUp && key.press) key.press();
+        key.isDown = true;
+        key.isUp = false;
+        event.preventDefault();
+      }
+    };
+  
+    //The `upHandler`
+    key.upHandler = event => {
+      if (event.key === key.value) {
+        if (key.isDown && key.release) key.release();
+        key.isDown = false;
+        key.isUp = true;
+        event.preventDefault();
+      }
+    };
+  
+    //Attach event listeners
+    const downListener = key.downHandler.bind(key);
+    const upListener = key.upHandler.bind(key);
+    
+    window.addEventListener(
+      "keydown", downListener, false
+    );
+    window.addEventListener(
+      "keyup", upListener, false
+    );
+    
+    // Detach event listeners
+    key.unsubscribe = () => {
+      window.removeEventListener("keydown", downListener);
+      window.removeEventListener("keyup", upListener);
+    };
+    
+    return key;
+  }
+
+  let keyObject = keyboard(keyValue)
+
+//   keyObject.press = () => {
+//     //key object pressed
+//   };
+//   keyObject.release = () => {
+//     //key object released
+//   };
+
+  keyObject.unsubscribe();
+
