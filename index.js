@@ -51,6 +51,8 @@ function setup() {
     warrior.position.set(400, 400);
     warrior.scale.set(0.3);
     warrior.anchor.set(0.5)
+    warrior.vx = 0;
+    warrior.vy = 0
     app.stage.addChild(warrior)
 
     board = new Sprite(
@@ -71,6 +73,7 @@ function setup() {
     let up = keyboard("ArrowUp")
     let right = keyboard("ArrowRight")
     let down = keyboard("ArrowDown")
+    let jump = keyboard("Tab")
 
     // left
     left.press = () => {
@@ -116,6 +119,18 @@ function setup() {
         }
     }
 
+    //jump
+    jump.press = () => {
+        gsap.to(redDragon, {duration: 2, x: redDragon.x + 100})
+        redDragon.vx = 0;
+        warrior.vy = -2;
+        warrior.vx = 0;
+    }
+    jump.release = () => {
+        redDragon.vy = 0;
+        warrior.vy = 0;
+    }
+
 
     state = play;
 
@@ -129,6 +144,8 @@ function gameLoop(delta){
 function play(delta){
     redDragon.x += redDragon.vx;
     redDragon.y += redDragon.vy;
+    warrior.x += warrior.vx;
+    warrior.y += warrior.vy;
 }
 
 function keyboard(value) {
@@ -179,13 +196,6 @@ function keyboard(value) {
   }
 
   let keyObject = keyboard(keyValue)
-
-//   keyObject.press = () => {
-//     //key object pressed
-//   };
-//   keyObject.release = () => {
-//     //key object released
-//   };
 
   keyObject.unsubscribe();
 
