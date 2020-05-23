@@ -22,17 +22,22 @@ loader
     .add([
         "images/dragonRed.png",
         "images/warrior.png",
+        "images/wizard.png",
         "images/wood.png"
     ])
     .load(setup);
 
 let redDragon;
 let warrior;
+let wizard;
 let board;
 let state;
 
 let messageBoard = new Container()
-let message = new Text("Practice Game")
+let messageStyle = ({
+    fill: 'white'
+})
+let message = new Text("Practice Game", messageStyle)
 
 function setup() {
     redDragon = new Sprite(
@@ -50,10 +55,22 @@ function setup() {
     );
     warrior.position.set(400, 400);
     warrior.scale.set(0.3);
-    warrior.anchor.set(0.5)
+    warrior.anchor.set(0.5);
     warrior.vx = 0;
-    warrior.vy = 0
+    warrior.vy = 0;
+    warrior.interactive = true;
     app.stage.addChild(warrior)
+
+    wizard = new Sprite(
+        resources["images/wizard.png"].texture
+    )
+    wizard.position.set(200, 400)
+    wizard.scale.set(-0.3, 0.3);
+    wizard.anchor.set(0.5);
+    wizard.vx = 0;
+    wizard.vy = 0;
+    wizard.interactive = true;
+    app.stage.addChild(wizard)
 
     board = new Sprite(
         resources["images/wood.png"].texture
@@ -65,6 +82,8 @@ function setup() {
 
     message.position.y = app.renderer.height - 120;
     message.position.x = 50;
+    message.interactive = true;
+    message.click = () => message.text = "did it work?"
     messageBoard.addChild(message)
 
     app.stage.addChild(messageBoard)
@@ -146,6 +165,8 @@ function play(delta){
     redDragon.y += redDragon.vy;
     warrior.x += warrior.vx;
     warrior.y += warrior.vy;
+    wizard.x += wizard.vx;
+    wizard.y += wizard.vy;
 }
 
 function keyboard(value) {
@@ -193,9 +214,12 @@ function keyboard(value) {
     };
     
     return key;
-  }
+}
 
-  let keyObject = keyboard(keyValue)
+let keyObject = keyboard(keyValue)
 
-  keyObject.unsubscribe();
+keyObject.unsubscribe();
+
+message.on("click", () => message.text = "Did it work?")
+message.click = () => message.text = "did it work?"
 
